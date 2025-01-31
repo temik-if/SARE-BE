@@ -74,22 +74,17 @@ model Resource {
 }
 
 model Equipment {
-  id            Int      @id @default(autoincrement())
-  resource_id   Int      @unique
-  serial_number String   @unique
+  resource_id   Int    @id
+  serial_number String @unique
   model         String
   brand         String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
 
   resource Resource @relation(fields: [resource_id], references: [id])
 }
 
 model Room {
-  id          Int      @id @default(autoincrement())
-  resource_id Int      @unique
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  resource_id Int @id
+  capacity    Int
 
   resource Resource @relation(fields: [resource_id], references: [id])
 }
