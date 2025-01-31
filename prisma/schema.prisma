@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,4 +5,103 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+enum UserType {
+  TEACHER
+  COORDINATOR
+}
+
+enum ShiftType {
+  MORNING
+  AFTERNOON
+  EVENING
+}
+
+enum BookingStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  NO_RETURN
+  CANCELED
+}
+
+enum ResourceStatusType {
+  AVAILABLE
+  UNAVAILABLE
+}
+
+model User {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  first_name String
+  last_name  String
+  password   String
+  is_active  Boolean  @default(true)
+  type       UserType
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  bookings  Booking[]
+  penalties Penalty[]
+}
+
+model Booking {
+  id          Int           @id @default(autoincrement())
+  user_id     String
+  resource_id Int
+  shift       ShiftType
+  status      BookingStatus
+  date        DateTime
+  class       Int[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  user     User     @relation(fields: [user_id], references: [id])
+  resource Resource @relation(fields: [resource_id], references: [id])
+}
+
+model Resource {
+  id        Int                @id @default(autoincrement())
+  name      String             @unique
+  status    ResourceStatusType
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  equipment Equipment?
+  room      Room?
+  bookings  Booking[]
+}
+
+model Equipment {
+  id            Int      @id @default(autoincrement())
+  resource_id   Int      @unique
+  serial_number String   @unique
+  model         String
+  brand         String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  resource Resource @relation(fields: [resource_id], references: [id])
+}
+
+model Room {
+  id          Int      @id @default(autoincrement())
+  resource_id Int      @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  resource Resource @relation(fields: [resource_id], references: [id])
+}
+
+model Penalty {
+  id          Int      @id @default(autoincrement())
+  user_id     String
+  description String
+  start_date  DateTime
+  end_date    DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [user_id], references: [id])
 }
