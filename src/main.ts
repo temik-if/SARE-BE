@@ -13,7 +13,6 @@ async function bootstrap() {
     .setTitle('Documentação API SARE')
     .setDescription('Neste espaço, você encontrará a descrição detalhada de todas as rotas da aplicação, incluindo informações sobre os endpoints disponíveis, métodos HTTP utilizados, parâmetros necessários, e as tabelas do banco de dados associadas a cada funcionalidade. Essa documentação servirá como uma referência completa para entender a estrutura e o funcionamento das APIs, facilitando o desenvolvimento e a integração.')
     .setVersion('1.0')
-    .addTag('users')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
