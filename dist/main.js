@@ -3,8 +3,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("@nestjs/core");
 const app_module_1 = require("./app.module");
 const swagger_1 = require("@nestjs/swagger");
+const validation_pipe_1 = require("@nestjs/common/pipes/validation.pipe");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
+    app.enableCors();
+    app.useGlobalPipes(new validation_pipe_1.ValidationPipe());
     const config = new swagger_1.DocumentBuilder()
         .setTitle('Documentação API SARE')
         .setDescription('Neste espaço, você encontrará a descrição detalhada de todas as rotas da aplicação, incluindo informações sobre os endpoints disponíveis, métodos HTTP utilizados, parâmetros necessários, e as tabelas do banco de dados associadas a cada funcionalidade. Essa documentação servirá como uma referência completa para entender a estrutura e o funcionamento das APIs, facilitando o desenvolvimento e a integração.')
