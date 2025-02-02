@@ -33,7 +33,8 @@ export class UserService {
     }
     
     async getAllUsers() {
-        return this.prismaService.user.findMany();
+        const users = await this.prismaService.user.findMany();
+        return users.map(u => omit(u, ['password']));
     }
 
     async findUserById(id: string){

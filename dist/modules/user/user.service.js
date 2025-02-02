@@ -40,7 +40,8 @@ let UserService = class UserService {
         return (0, lodash_1.omit)(user, ['password']);
     }
     async getAllUsers() {
-        return this.prismaService.user.findMany();
+        const users = await this.prismaService.user.findMany();
+        return users.map(u => (0, lodash_1.omit)(u, ['password']));
     }
     async findUserById(id) {
         const user = await this.prismaService.user.findUnique({

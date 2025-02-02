@@ -17,7 +17,7 @@ export declare class UserService {
         createdAt: Date;
         updatedAt: Date;
     }, "password">>;
-    getAllUsers(): Promise<{
+    getAllUsers(): Promise<import("lodash").Omit<{
         id: string;
         email: string;
         first_name: string;
@@ -28,7 +28,7 @@ export declare class UserService {
         type: import(".prisma/client").$Enums.UserType;
         createdAt: Date;
         updatedAt: Date;
-    }[]>;
+    }, "password">[]>;
     findUserById(id: string): Promise<import("lodash").Omit<{
         id: string;
         email: string;
