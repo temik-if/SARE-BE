@@ -36,6 +36,7 @@ model User {
   email      String   @unique
   first_name String
   last_name  String
+  full_name  String
   password   String
   is_active  Boolean  @default(true)
   type       UserType
