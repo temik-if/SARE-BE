@@ -1,9 +1,10 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, UnauthorizedException } from "@nestjs/common";
 import { PrismaService } from "src/prisma.service";
-import { CreateUserDto } from "./dto/create-user.dto";
+import { CreateUserDto } from "./dtos/create-user.dto";
 import * as bcrypt from 'bcrypt';
 import { omit } from 'lodash';
-import type { UpdateUserDto } from "./dto/update-user.dto";
+import type { UpdateUserDto } from "./dtos/update-user.dto";
+import type { UserType } from '@prisma/client';
 
 @Injectable()
 export class UserService {
@@ -33,13 +34,32 @@ export class UserService {
     }
     
     async getAllUsers() {
-        const users = await this.prismaService.user.findMany();
+        const users = await this.prismaService.user.findMany({});
+        return users.map(u => omit(u, ['password']));
+    }
+
+    async getAllUsersActive() {
+        const users = await this.prismaService.user.findMany({
+            where: {
+                is_active: true
+            }
+        });
+
+        return users.map(u => omit(u, ['password']));
+    }
+
+    async getAllUsersInactive() {
+        const users = await this.prismaService.user.findMany({
+            where: {
+                is_active: false
+            }
+        });
         return users.map(u => omit(u, ['password']));
     }
 
     async findUserById(id: string){
         const user = await this.prismaService.user.findUnique({
-            where: { id }
+            where: { id, is_active: true }
         });
 
         if (!user) {
@@ -51,7 +71,7 @@ export class UserService {
 
     async findUserByEmail(email: string){
         const user = await this.prismaService.user.findUnique({
-            where: { email }
+            where: { email, is_active: true }
         });
 
         if (!user) {
@@ -67,18 +87,43 @@ export class UserService {
                 full_name: {
                     contains: name,
                     mode: 'insensitive'
-                }
+                },
+                is_active: true
             }
         });
 
         return user.map(u => omit(u, ['password']));
     }
 
-    async updateUser(id: string, data: UpdateUserDto) {
+
+    async findUserByType(type: UserType){
+        const user = await this.prismaService.user.findMany({
+            where: {
+                type: type,
+                is_active: true
+            }
+        });
+
+        return user.map(u => omit(u, ['password']));
+    }
+
+    async findUserWithPassword(email: string){
+        const user = await this.prismaService.user.findUnique({
+            where: { email, is_active: true }
+        });
+
+        return user;
+    }
+
+    async updateUser(id: string, data: UpdateUserDto, reqUser: any) {
+        if (reqUser.id !== id) {
+            throw new UnauthorizedException('You can only update your own profile');
+        }
+
         await this.validatorUser(data);
         
         const user = await this.prismaService.user.findUnique({
-            where: { id }
+            where: { id, is_active: true }
         });
 
         if (!user) {
@@ -104,19 +149,48 @@ export class UserService {
         return omit(updatedUser, ['password']);
     }
 
-    async deleteUser(id: string) {
+    async activateUser(id: string) {
         const user = await this.prismaService.user.findUnique({
-            where: { id }
+            where: { id, is_active: false }
         });
 
         if (!user) {
             throw new BadRequestException('User not found');
         }
 
-        await this.prismaService.user.delete({
-            where: { id }
+        const updatedUser = await this.prismaService.user.update({
+            where: { id },
+            data: {
+                is_active: true
+            }
         });
 
-        return omit(user, ['password']);
+        return omit(updatedUser, ['password']);
+    }
+
+    async deactivateUser(id: string, reqUser: any) {
+        if (reqUser.id !== id && reqUser.type !== 'COORDINATOR') {
+            console.log(reqUser.id, id);
+            throw new UnauthorizedException('You can only deactivate your own profile');
+        }
+        const user = await this.prismaService.user.findUnique({
+            where: { id, is_active: true }
+        });
+
+        if (!user) {
+            throw new BadRequestException('User not found');
+        }
+
+        const updatedUser = await this.prismaService.user.update({
+            where: { id },
+            data: {
+                is_active: false
+            }
+        });
+
+        return{
+            ... omit(updatedUser, ['password']),
+            logout: reqUser.id === id ? true : false
+        }
     }
 }
