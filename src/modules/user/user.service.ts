@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, UnauthorizedException } from "@nestjs/common";
-import { PrismaService } from "src/prisma.service";
+import { PrismaService } from "src/prisma/prisma.service";
 import { CreateUserDto } from "./dtos/create-user.dto";
 import * as bcrypt from 'bcrypt';
 import { omit } from 'lodash';
