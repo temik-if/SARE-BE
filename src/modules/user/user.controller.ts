@@ -9,17 +9,14 @@ import { RolesGuard } from "../auth/guards/roles.guard";
 import { UserType } from '@prisma/client';
 
 @ApiTags('User')
-@ApiBearerAuth()
 @Controller('user')
 export class UserController {
     constructor(private readonly userService: UserService) {}
 
     @Post()
-    @Roles('COORDINATOR')
-    @UseGuards(JwtAuthGuard, RolesGuard)
     @ApiOperation({ 
         summary: 'Create a new user', 
-        description: 'Creates a new user with the provided details. Requires COORDINATOR role.' 
+        description: 'Creates a new user with the provided details.' 
     })
     @ApiBody({ type: CreateUserDto })
     @ApiResponse({ status: 201, description: 'User created successfully' })
@@ -32,6 +29,7 @@ export class UserController {
     @Get()
     @Roles('COORDINATOR')
     @UseGuards(JwtAuthGuard, RolesGuard)
+    @ApiBearerAuth()
     @ApiOperation({ 
         summary: 'Get all users', 
         description: 'Returns a list of all registered users. Requires COORDINATOR role.' 
@@ -45,6 +43,7 @@ export class UserController {
     @Get('active')
     @Roles('COORDINATOR')
     @UseGuards(JwtAuthGuard, RolesGuard)
+    @ApiBearerAuth()
     @ApiOperation({ 
         summary: 'Get all active users', 
         description: 'Returns a list of all active users. Requires COORDINATOR role.' 
@@ -58,6 +57,7 @@ export class UserController {
     @Get('inactive')
     @Roles('COORDINATOR')
     @UseGuards(JwtAuthGuard, RolesGuard)
+    @ApiBearerAuth()
     @ApiOperation({ 
         summary: 'Get all inactive users', 
         description: 'Returns a list of all inactive users. Requires COORDINATOR role.' 
@@ -71,6 +71,7 @@ export class UserController {
     @Get(':id')
     @Roles('COORDINATOR')
     @UseGuards(JwtAuthGuard, RolesGuard)
+    @ApiBearerAuth()
     @ApiOperation({ 
         summary: 'Get user by ID', 
         description: 'Retrieves a user based on their unique ID.' 
@@ -86,6 +87,7 @@ export class UserController {
     @Get('email/:email')
     @Roles('COORDINATOR')
     @UseGuards(JwtAuthGuard, RolesGuard)
+    @ApiBearerAuth()
     @ApiOperation({ 
         summary: 'Get user by email', 
         description: 'Finds a user by their email address. Requires COORDINATOR role.' 
@@ -101,6 +103,7 @@ export class UserController {
     @Get('search/:name')
     @Roles('COORDINATOR')
     @UseGuards(JwtAuthGuard, RolesGuard)
+    @ApiBearerAuth()
     @ApiOperation({ 
         summary: 'Search user by name', 
         description: 'Finds users based on a partial name match. Requires COORDINATOR role.' 
@@ -116,6 +119,7 @@ export class UserController {
     @Get('type/:type')
     @Roles('COORDINATOR')
     @UseGuards(JwtAuthGuard, RolesGuard)
+    @ApiBearerAuth()
     @ApiOperation({ 
         summary: 'Get users by type', 
         description: 'Retrieves users filtered by their role. Requires COORDINATOR role.' 
@@ -129,6 +133,7 @@ export class UserController {
 
     @Put(':id')
     @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
     @ApiOperation({ 
         summary: 'Update a user', 
         description: 'Updates user details based on their ID.' 
@@ -145,6 +150,7 @@ export class UserController {
     @Put('activate/:id')
     @Roles('COORDINATOR')
     @UseGuards(JwtAuthGuard, RolesGuard)
+    @ApiBearerAuth()
     @ApiOperation({ 
         summary: 'Activate user by ID', 
         description: 'Reactivates a user account. Requires COORDINATOR role.' 
@@ -158,6 +164,7 @@ export class UserController {
 
     @Put('deactivate/:id')
     @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
     @ApiOperation({ 
         summary: 'Deactivate user by ID', 
         description: 'Deactivates a user account.' 
