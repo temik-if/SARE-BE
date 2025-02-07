@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put, UseGuards, Request } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, UseGuards, Request, Patch } from '@nestjs/common';
 import { UserService } from "./user.service";
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from "./dtos/update-user.dto";
@@ -147,7 +147,7 @@ export class UserController {
         return this.userService.updateUser(id, data, req.user);
     }
 
-    @Put('activate/:id')
+    @Patch('activate/:id')
     @Roles('COORDINATOR')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @ApiBearerAuth()
@@ -162,7 +162,7 @@ export class UserController {
         return this.userService.activateUser(id);
     }
 
-    @Put('deactivate/:id')
+    @Patch('deactivate/:id')
     @UseGuards(JwtAuthGuard)
     @ApiBearerAuth()
     @ApiOperation({ 
