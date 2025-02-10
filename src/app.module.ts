@@ -4,9 +4,11 @@ import { AuthModule } from './modules/auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
 import { ResourceModule } from './modules/resource/resource.module';
+import { PenaltiesController } from './modules/penalties/penalties.controller';
 
 @Module({
   imports: [UserModule, AuthModule, PrismaModule, ResourceModule, ConfigModule.forRoot({})],
+  controllers: [PenaltiesController],
 })
 
 export class AppModule {}
