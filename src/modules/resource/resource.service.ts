@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateResourceDto } from "./dto/create-dtos/create-resource.dto";
-import { ResourceStatusType } from "@prisma/client";
+import { ResourceStatusType, ShiftType } from "@prisma/client";
 import type { UpdateResourceDto } from "./dto/update-dtos/update-resource.dto";
 import type { UpdateResourceStatusDto } from "./dto/update-dtos/update-resourceStatus.dto";
 
@@ -73,6 +73,27 @@ export class ResourceService{
                 equipment: true,
                 room: true
             }
+        });
+    }
+
+    async getAvailableResources(date: Date, shift: ShiftType, lesson: number[]) {
+        return this.prismaService.resource.findMany({
+            where: {
+                status: 'AVAILABLE',
+                bookings: {
+                    none: {
+                        date: date,
+                        shift: shift,
+                        class: {
+                            hasSome: lesson,
+                        },
+                    },
+                },
+            },
+            include: {
+                equipment: true,
+                room: true
+            },
         });
     }
 
