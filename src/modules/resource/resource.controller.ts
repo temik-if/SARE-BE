@@ -1,11 +1,11 @@
-import { Body, Controller, Post, Get, UseGuards, Param, Query, Put, Patch, ParseIntPipe, Delete } from '@nestjs/common';
+import { Body, Controller, Post, Get, UseGuards, Param, Query, Put, Patch, ParseIntPipe, Delete, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ResourceService } from './resource.service';
 import { CreateResourceDto } from './dto/create-dtos/create-resource.dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBody } from '@nestjs/swagger';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import type { ResourceStatusType } from '@prisma/client';
+import { ResourceStatusType, ShiftType } from '@prisma/client';
 import { UpdateResourceStatusDto } from './dto/update-dtos/update-resourceStatus.dto';
 import { UpdateResourceDto } from './dto/update-dtos/update-resource.dto';
 
@@ -38,6 +38,22 @@ export class ResourceController {
     @ApiResponse({ status: 200, description: 'Returns an array of resources' })
     async getAllResources(@Query('status') status: ResourceStatusType) {
         return this.resourceService.getAllResources(status);
+    }
+
+    @Get('available')
+    @UseGuards(JwtAuthGuard)
+    @UsePipes(new ValidationPipe({ transform: true }))
+    @ApiOperation({ 
+        summary: 'Get available resources', 
+        description: 'Returns a list of available resources based on the date, shift, and lesson provided.' 
+    })
+    @ApiQuery({ name: 'date', required: true, description: 'Date of the booking' })
+    @ApiQuery({ name: 'shift', required: true, description: 'Shift of the booking' })
+    @ApiQuery({ name: 'lesson', required: true, description: 'Lesson of the booking' })
+    @ApiResponse({ status: 200, description: 'Returns an array of available resources' })
+    async getAvailableResources(@Query('date') date: string, @Query('shift') shift: ShiftType, @Query('lesson') lesson: string) {
+        const parsedLesson = lesson.split(',').map(Number);
+        return this.resourceService.getAvailableResources(new Date(date), shift, parsedLesson);
     }
 
     @Get('equipment')
