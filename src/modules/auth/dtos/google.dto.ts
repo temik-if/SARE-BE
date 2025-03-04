@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString, MinLength, IsNotEmpty, Matches } from 'class-validator';
+import { IsEmail, IsString, IsNotEmpty} from 'class-validator';
 export class GoogleDto {
   @ApiProperty({
     example: "user@educ.al.gov.br",
