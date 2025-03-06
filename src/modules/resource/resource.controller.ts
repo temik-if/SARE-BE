@@ -1,13 +1,13 @@
 import { Body, Controller, Post, Get, UseGuards, Param, Query, Put, Patch, ParseIntPipe, Delete, UsePipes, ValidationPipe } from '@nestjs/common';
 import { ResourceService } from './resource.service';
-import { CreateResourceDto } from './dto/create-dtos/create-resource.dto';
+import { CreateResourceDto } from './dtos/create-dtos/create-resource.dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBody } from '@nestjs/swagger';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { ResourceStatusType, ShiftType } from '@prisma/client';
-import { UpdateResourceStatusDto } from './dto/update-dtos/update-resourceStatus.dto';
-import { UpdateResourceDto } from './dto/update-dtos/update-resource.dto';
+import { UpdateResourceStatusDto } from './dtos/update-dtos/update-resourceStatus.dto';
+import { UpdateResourceDto } from './dtos/update-dtos/update-resource.dto';
 
 @ApiBearerAuth()
 @Controller('resource')
