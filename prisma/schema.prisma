@@ -53,7 +53,7 @@ model Booking {
   resource_id Int
   shift       ShiftType
   status      BookingStatus
-  date        DateTime
+  date        String
   class       Int[]
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt

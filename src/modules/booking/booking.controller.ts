@@ -94,7 +94,7 @@ export class BookingController {
     @ApiOperation({ summary: 'Find bookings by date', description: 'Returns a list of bookings based on the date provided.' })
     @ApiResponse({ status: 200, description: 'Returns an array of bookings' })
     @ApiResponse({ status: 403, description: 'Forbidden - User does not have the required role' })
-    async findBookingByDate(@Param('date') date: Date) {
+    async findBookingByDate(@Param('date') date: string) {
         return this.bookingService.findBookingByDate(date);
     }
 

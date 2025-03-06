@@ -76,7 +76,7 @@ export class ResourceService{
         });
     }
 
-    async getAvailableResources(date: Date, shift: ShiftType, lesson: number[]) {
+    async getAvailableResources(date: string, shift: ShiftType, lesson: number[]) {
         return this.prismaService.resource.findMany({
             where: {
                 status: 'AVAILABLE',

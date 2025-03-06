@@ -9,8 +9,8 @@ export class UpdateBookingDto extends PartialType(CreateBookingDto) {
     @ApiProperty({ example: 'MORNING', description: 'The shift of the booking' })
     shift: ShiftType;
 
-    @ApiProperty({ example: '2025-03-01T00:00:00.000Z', description: 'The date of the booking' })
-    date: Date;
+    @ApiProperty({ example: '2025-03-01', description: 'The date of the booking' })
+    date: string;
 
     @ApiProperty({ example: [1, 2, 3], description: 'The class of the booking' })
     class: number[];

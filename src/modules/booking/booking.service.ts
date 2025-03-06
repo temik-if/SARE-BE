@@ -80,7 +80,7 @@ export class BookingService {
         });
     }
 
-    async findBookingByDate(date: Date){
+    async findBookingByDate(date: string){
         return this.prismaService.booking.findMany({
             where: { date }
         });

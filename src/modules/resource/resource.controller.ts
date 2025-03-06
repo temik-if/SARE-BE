@@ -53,7 +53,7 @@ export class ResourceController {
     @ApiResponse({ status: 200, description: 'Returns an array of available resources' })
     async getAvailableResources(@Query('date') date: string, @Query('shift') shift: ShiftType, @Query('lesson') lesson: string) {
         const parsedLesson = lesson.split(',').map(Number);
-        return this.resourceService.getAvailableResources(new Date(date), shift, parsedLesson);
+        return this.resourceService.getAvailableResources(date, shift, parsedLesson);
     }
 
     @Get('equipment')
