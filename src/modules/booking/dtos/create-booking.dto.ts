@@ -1,6 +1,6 @@
-import { ApiOperation, ApiProperty } from "@nestjs/swagger";
+import { ApiProperty } from "@nestjs/swagger";
 import { ShiftType } from "@prisma/client";
-import { IsDate, IsEnum, IsNotEmpty, IsNumber } from "class-validator";
+import { IsEnum, IsNotEmpty, IsNumber, IsString, Matches } from "class-validator";
 
 export class CreateBookingDto {
     @ApiProperty({ example: 1, description: 'The id of the resource' })
@@ -13,10 +13,11 @@ export class CreateBookingDto {
     @IsEnum(ShiftType, { message: 'Invalid shift, choose between MORNING, AFTERNOON, or NIGHT' })
     shift: ShiftType;
 
-    @ApiProperty({ example: '2025-03-01T00:00:00.000Z', description: 'The date of the booking' })
+    @ApiProperty({ example: '2025-03-01', description: 'The date of the booking' })
     @IsNotEmpty({ message: 'Date is required' })
-    @IsDate({ message: 'Invalid date' })
-    date: Date;
+    @IsString({ message: 'Invalid date' })
+    @Matches(/^(?:20)\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/, { message: 'Date must be in the format yyyy-MM-dd' })
+    date: string;
 
     @ApiProperty({ example: [1, 2, 3], description: 'The class of the booking' })
     @IsNotEmpty({ message: 'Class is required' })

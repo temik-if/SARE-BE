@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
-import { CreateBookingDto } from './dto/create-booking.dto';
+import { CreateBookingDto } from './dtos/create-booking.dto';
 import { ResourceService } from "../resource/resource.service";
 import { BookingStatus, ShiftType } from "@prisma/client";
-import { UpdateBookingDto } from "./dto/update-booking.dto";
-import { UpdateBookingStatusDto } from "./dto/update-booking-status.dto";
+import { UpdateBookingDto } from "./dtos/update-booking.dto";
+import { UpdateBookingStatusDto } from "./dtos/update-booking-status.dto";
 import { UserService } from "../user/user.service";
 
 @Injectable()
@@ -80,7 +80,7 @@ export class BookingService {
         });
     }
 
-    async findBookingByDate(date: Date){
+    async findBookingByDate(date: string){
         return this.prismaService.booking.findMany({
             where: { date }
         });
