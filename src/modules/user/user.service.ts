@@ -116,8 +116,8 @@ export class UserService {
     }
 
     async updateUser(id: string, data: UpdateUserDto, reqUser: any) {
-        if (reqUser.id !== id) {
-            throw new UnauthorizedException('You can only update your own profile');
+        if (reqUser.id !== id && reqUser.type !== 'COORDINATOR') {
+            throw new UnauthorizedException('You do not have permission to update this user');
         }
 
         await this.validatorUser(data);

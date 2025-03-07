@@ -15,11 +15,11 @@ export class CreateUserDto {
     
     @ApiProperty({ 
         example: 'user@educ.al.gov.br', 
-        description: 'The email of the user. Must belong to the domain "educ.al.gov.br".' 
+        description: 'The email of the user. Must belong to the domain "educ.al.gov.br" or "professor.educ.al.gov.br".' 
     })
     @IsNotEmpty({ message: 'Email is required' })
     @IsEmail({}, { message: 'Invalid email' })
-    @Matches(/^[a-zA-Z0-9._%+-]+@educ\.al\.gov\.br$/, { message: 'Email must belong to the domain "educ.al.gov.br"' })
+    @Matches(/^[a-zA-Z0-9._%+-]+@(educ\.al\.gov\.br|professor\.educ\.al\.gov\.br)$/, { message: 'Email must belong to the domain "educ.al.gov.br" or "professor.educ.al.gov.br"' })
     email: string;
     
     @ApiProperty({ 
