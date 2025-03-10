@@ -92,7 +92,8 @@ model Penalty {
   id          Int      @id @default(autoincrement())
   user_id     String
   description String
-  start_date  DateTime
+  duration    Int
+  start_date  DateTime @default(now())
   end_date    DateTime
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
