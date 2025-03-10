@@ -6,16 +6,24 @@ import { BookingStatus, ShiftType } from "@prisma/client";
 import { UpdateBookingDto } from "./dtos/update-booking.dto";
 import { UpdateBookingStatusDto } from "./dtos/update-booking-status.dto";
 import { UserService } from "../user/user.service";
+import { PenaltyService } from "../penalty/penalty.service";
 
 @Injectable()
 export class BookingService {
     constructor(
         private readonly prismaService: PrismaService,
         private readonly resourceService: ResourceService,
-        private readonly userService: UserService
+        private readonly userService: UserService,
+        private readonly penaltyService: PenaltyService
     ) {}
 
     async createBooking(user: string, data: CreateBookingDto){
+        const activePenalty = await this.penaltyService.findActivePenaltyByUser(user);
+
+        if (activePenalty.length > 0){
+            throw new BadRequestException('User has an active penalty and cannot create a booking.');
+        }
+
         const resource = await this.resourceService.getAvailableResources(
             data.date,
             data.shift,
@@ -69,12 +77,16 @@ export class BookingService {
     }
 
     async findBookingByUser(user: string){
+        await this.userService.findUserById(user);
+
         return this.prismaService.booking.findMany({
             where: { user_id: user }
         });
     }
 
     async findBookingByResource(resource: number){
+        await this.resourceService.findResourceById(resource);
+
         return this.prismaService.booking.findMany({
             where: { resource_id: resource }
         });
