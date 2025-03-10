@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Request, UseGuards, Get, Param, Patch, Put, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Request, UseGuards, Get, Param, Patch, Put, Delete, ParseIntPipe } from '@nestjs/common';
 import { BookingService } from './booking.service';
 import { CreateBookingDto } from './dtos/create-booking.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -83,7 +83,7 @@ export class BookingController {
     @ApiOperation({ summary: 'Find bookings by resource', description: 'Returns a list of bookings based on the resource ID provided.' })
     @ApiResponse({ status: 200, description: 'Returns an array of bookings' })
     @ApiResponse({ status: 403, description: 'Forbidden - User does not have the required role' })
-    async findBookingByResource(@Param('id') id: number) {
+    async findBookingByResource(@Param('id', ParseIntPipe) id: number) {
         return this.bookingService.findBookingByResource(id);
     }
 
@@ -106,7 +106,7 @@ export class BookingController {
     @ApiResponse({ status: 200, description: 'Booking status updated successfully' })
     @ApiResponse({ status: 400, description: 'Bad Request - Validation errors' })
     @ApiResponse({ status: 403, description: 'Forbidden - User does not have the required role' })
-    async updateStatusBooking(@Param('id') id: number, @Body() data: UpdateBookingStatusDto) {
+    async updateStatusBooking(@Param('id', ParseIntPipe) id: number, @Body() data: UpdateBookingStatusDto) {
         return this.bookingService.updateStatusBooking(id, data);
     }
 
@@ -115,7 +115,7 @@ export class BookingController {
     @ApiOperation({ summary: 'Update booking', description: 'Updates the details of a booking.' })
     @ApiResponse({ status: 200, description: 'Booking updated successfully' })
     @ApiResponse({ status: 400, description: 'Bad Request - Validation errors' })
-    async updateBooking(@Param('id') id: number, @Body() data: UpdateBookingDto, @Request() req) {
+    async updateBooking(@Param('id', ParseIntPipe) id: number, @Body() data: UpdateBookingDto, @Request() req) {
         return this.bookingService.updateBooking(id, req.user.id, data);
     }
 
@@ -124,7 +124,7 @@ export class BookingController {
     @ApiOperation({ summary: 'Delete a booking', description: 'Deletes a booking based on its unique ID.' })
     @ApiResponse({ status: 200, description: 'Booking deleted successfully' })
     @ApiResponse({ status: 400, description: 'Bad Request - Validation errors' })
-    async deleteBooking(@Param('id') id: number, @Request() req) {
+    async deleteBooking(@Param('id', ParseIntPipe) id: number, @Request() req) {
         return this.bookingService.deleteBooking(id, req.user.id);
     }
 }

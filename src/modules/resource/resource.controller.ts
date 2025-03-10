@@ -89,7 +89,7 @@ export class ResourceController {
     @ApiParam({ name: 'id', required: true, description: 'UUID of the resource' })
     @ApiResponse({ status: 200, description: 'Returns the resource details' })
     @ApiResponse({ status: 404, description: 'Resource not found' })
-    async findResourceById(@Param('id') id: number) {
+    async findResourceById(@Param('id', ParseIntPipe) id: number) {
         return this.resourceService.findResourceById(id);
     }
 
