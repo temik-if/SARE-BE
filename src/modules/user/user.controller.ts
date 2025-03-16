@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put, UseGuards, Request, Patch } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, UseGuards, Request, Patch, ParseBoolPipe } from '@nestjs/common';
 import { UserService } from "./user.service";
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from "./dtos/update-user.dto";
@@ -40,32 +40,19 @@ export class UserController {
         return this.userService.getAllUsers();
     }
 
-    @Get('active')
+    @Get('status/:status')
     @Roles('COORDINATOR')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @ApiBearerAuth()
     @ApiOperation({ 
-        summary: 'Get all active users', 
-        description: 'Returns a list of all active users. Requires COORDINATOR role.' 
+        summary: 'Get users by status', 
+        description: 'Retrieves users based on their account status. Requires COORDINATOR role.' 
     })
-    @ApiResponse({ status: 200, description: 'Returns an array of active users' })
-    @ApiResponse({ status: 403, description : 'Forbidden - User does not have the required role' })
-    async getAllUsersActive() {
-        return this.userService.getAllUsersActive();
-    }
-    
-    @Get('inactive')
-    @Roles('COORDINATOR')
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @ApiBearerAuth()
-    @ApiOperation({ 
-        summary: 'Get all inactive users', 
-        description: 'Returns a list of all inactive users. Requires COORDINATOR role.' 
-    })
-    @ApiResponse({ status: 200, description: 'Returns an array of inactive users' })
+    @ApiParam({ name: 'status', required: true, description: 'User status' })
+    @ApiResponse({ status: 200, description: 'Returns an array of users with the specified status' })
     @ApiResponse({ status: 403, description: 'Forbidden - User does not have the required role' })
-    async getAllUsersInactive() {
-        return this.userService.getAllUsersInactive();
+    async findUserByStatus(@Param('status', ParseBoolPipe) status: boolean) {
+        return this.userService.findUserByStatus(status);
     }
 
     @Get(':id')
@@ -172,7 +159,7 @@ export class UserController {
     @ApiParam({ name: 'id', required: true, description: 'UUID of the user' })
     @ApiResponse({ status: 200, description: 'User deactivated successfully' })
     @ApiResponse({ status: 404, description: 'User not found' })
-    async deleteUser(@Param('id') id: string, @Request() req) {
+    async deactivateUser(@Param('id') id: string, @Request() req) {
         return this.userService.deactivateUser(id, req.user);
     }
 }

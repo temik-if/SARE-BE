@@ -38,22 +38,11 @@ export class UserService {
         return users.map(u => omit(u, ['password']));
     }
 
-    async getAllUsersActive() {
+    async findUserByStatus(is_active: boolean) {
         const users = await this.prismaService.user.findMany({
-            where: {
-                is_active: true
-            }
+            where: { is_active }
         });
 
-        return users.map(u => omit(u, ['password']));
-    }
-
-    async getAllUsersInactive() {
-        const users = await this.prismaService.user.findMany({
-            where: {
-                is_active: false
-            }
-        });
         return users.map(u => omit(u, ['password']));
     }
 
@@ -143,6 +132,27 @@ export class UserService {
             data: {
                 ...data,
                 full_name: full_name
+            }
+        });
+
+        return omit(updatedUser, ['password']);
+    }
+
+    async updatePassword(id: string, password: string) {
+        const user = await this.prismaService.user.findUnique({
+            where: { id, is_active: true }
+        });
+
+        if (!user) {
+            throw new BadRequestException('User not found');
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const updatedUser = await this.prismaService.user.update({
+            where: { id },
+            data: {
+                password: hashedPassword
             }
         });
 
