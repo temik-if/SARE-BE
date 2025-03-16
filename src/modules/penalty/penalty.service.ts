@@ -99,18 +99,4 @@ export class PenaltyService {
             });
         }
     }
-
-    async deletePenalty(id: number) {
-        const penalty = await this.prismaService.penalty.findUnique({
-            where: { id }
-        });
-
-        if (!penalty) {
-            throw new BadRequestException('Penalty not found');
-        }
-
-        return this.prismaService.penalty.delete({
-            where: { id }
-        });
-    }
 }

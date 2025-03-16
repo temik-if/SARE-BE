@@ -178,19 +178,4 @@ export class ResourceController {
     async updateResource(@Param('id', ParseIntPipe) id: number, @Body() data: UpdateResourceDto) {
         return this.resourceService.updateResource(id, data);
     }
-
-    @Delete(':id')
-    @Roles('COORDINATOR')
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @ApiOperation({ 
-        summary: 'Delete a resource', 
-        description: 'Deletes a resource based on its unique ID.' 
-    })
-    @ApiParam({ name: 'id', required: true, description: 'UUID of the resource' })
-    @ApiResponse({ status: 200, description: 'Resource deleted successfully' })
-    @ApiResponse({ status: 403, description: 'Forbidden - User does not have the required role' })
-    @ApiResponse({ status: 404, description: 'Resource not found' })
-    async deleteResource(@Param('id', ParseIntPipe) id: number) {
-        return this.resourceService.deleteResource(id);
-    }
 }

@@ -118,13 +118,4 @@ export class BookingController {
     async updateBooking(@Param('id', ParseIntPipe) id: number, @Body() data: UpdateBookingDto, @Request() req) {
         return this.bookingService.updateBooking(id, req.user.id, data);
     }
-
-    @Delete(':id')
-    @UseGuards(JwtAuthGuard)
-    @ApiOperation({ summary: 'Delete a booking', description: 'Deletes a booking based on its unique ID.' })
-    @ApiResponse({ status: 200, description: 'Booking deleted successfully' })
-    @ApiResponse({ status: 400, description: 'Bad Request - Validation errors' })
-    async deleteBooking(@Param('id', ParseIntPipe) id: number, @Request() req) {
-        return this.bookingService.deleteBooking(id, req.user.id);
-    }
 }

@@ -156,24 +156,4 @@ export class BookingService {
             }
         });
     }
-
-    async deleteBooking(id: number, user_id: string){
-        const booking = await this.prismaService.booking.findUnique({
-            where: { id }
-        });
-
-        if (!booking){
-            throw new BadRequestException('Booking not found.');
-        }
-
-        const user = await this.userService.findUserById(user_id);
-
-        if (booking.user_id !== user.id && user.type !== 'COORDINATOR'){
-            throw new BadRequestException('You do not have permission to delete this booking.');
-        }
-
-        return this.prismaService.booking.delete({
-            where: { id }
-        });
-    }
 }

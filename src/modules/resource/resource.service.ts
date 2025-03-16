@@ -257,18 +257,4 @@ export class ResourceService{
             include: { equipment: true, room: true },
         });
     }
-
-    async deleteResource(id: number) {
-        const resource = await this.prismaService.resource.findUnique({
-            where: { id }
-        });
-
-        if (!resource) {
-            throw new BadRequestException('Resource not found');
-        }
-
-        return this.prismaService.resource.delete({
-            where: { id }
-        });
-    }
 }

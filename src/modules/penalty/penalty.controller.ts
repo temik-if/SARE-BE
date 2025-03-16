@@ -84,15 +84,4 @@ export class PenaltyController {
     async updatePenalty(@Param('id', ParseIntPipe) id: number, @Body() data: UpdatePenaltyDto) {
         return this.penaltyService.updatePenalty(id, data);
     }
-
-    @Delete(":id")
-    @Roles("COORDINATOR")
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @ApiOperation({ summary: "Delete penalty", description: "Deletes the penalty with the provided id." })
-    @ApiResponse({ status: 200, description: "Penalty deleted successfully" })
-    @ApiResponse({ status: 400, description: "Bad Request - Invalid id" })
-    @ApiResponse({ status: 403, description: "Forbidden - User does not have the required role" })
-    async deletePenalty(@Param('id', ParseIntPipe) id: number) {
-        return this.penaltyService.deletePenalty(id);
-    }
 }
