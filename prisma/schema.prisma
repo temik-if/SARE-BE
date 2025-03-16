@@ -45,6 +45,7 @@ model User {
 
   bookings  Booking[]
   penalties Penalty[]
+  passwordResetToken PasswordResetToken?
 }
 
 model Booking {
@@ -97,6 +98,17 @@ model Penalty {
   end_date    DateTime
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [user_id], references: [id])
+}
+
+model PasswordResetToken {
+  id        Int      @id @default(autoincrement())
+  user_id   String @unique
+  token     String @unique
+  expiresAt   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   user User @relation(fields: [user_id], references: [id])
 }
