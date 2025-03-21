@@ -5,10 +5,15 @@ import * as bcrypt from 'bcrypt';
 import { omit } from 'lodash';
 import type { UpdateUserDto } from "./dtos/update-user.dto";
 import type { UserType } from '@prisma/client';
+import { VerificationService } from "src/modules/verification/verification.service";
+import { ActivateUserDto } from "./dtos/activate-user.dto";
 
 @Injectable()
 export class UserService {
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(
+        private readonly prismaService: PrismaService,
+        private readonly verificationService: VerificationService
+    ) {}
 
     private async validatorUser(data: CreateUserDto | UpdateUserDto) {
         if (data.email){
@@ -30,6 +35,7 @@ export class UserService {
                 full_name: `${data.first_name} ${data.last_name}`,
                 ...data
             }});
+
         return omit(user, ['password']);
     }
     
@@ -84,7 +90,6 @@ export class UserService {
         return user.map(u => omit(u, ['password']));
     }
 
-
     async findUserByType(type: UserType){
         const user = await this.prismaService.user.findMany({
             where: {
@@ -98,7 +103,7 @@ export class UserService {
 
     async findUserWithPassword(email: string){
         const user = await this.prismaService.user.findUnique({
-            where: { email, is_active: true }
+            where: { email }
         });
 
         return user;
@@ -159,21 +164,25 @@ export class UserService {
         return omit(updatedUser, ['password']);
     }
 
-    async activateUser(id: string) {
+    async activateUser(data: ActivateUserDto) {
         const user = await this.prismaService.user.findUnique({
-            where: { id, is_active: false }
+            where: { email: data.email, is_active: false }
         });
 
         if (!user) {
             throw new BadRequestException('User not found');
         }
 
+        await this.verificationService.findCode(user.id, data.code);
+
         const updatedUser = await this.prismaService.user.update({
-            where: { id },
+            where: { id: user.id },
             data: {
                 is_active: true
             }
         });
+
+        await this.verificationService.deleteCode(user.id);
 
         return omit(updatedUser, ['password']);
     }

@@ -7,6 +7,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Roles } from "../auth/decorators/roles.decorator";
 import { RolesGuard } from "../auth/guards/roles.guard";
 import { UserType } from '@prisma/client';
+import { ActivateUserDto } from './dtos/activate-user.dto';
 
 @ApiTags('User')
 @Controller('user')
@@ -134,19 +135,16 @@ export class UserController {
         return this.userService.updateUser(id, data, req.user);
     }
 
-    @Patch('activate/:id')
-    @Roles('COORDINATOR')
-    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Patch('activate')
     @ApiBearerAuth()
     @ApiOperation({ 
-        summary: 'Activate user by ID', 
-        description: 'Reactivates a user account. Requires COORDINATOR role.' 
+        summary: 'Activate user', 
+        description: 'Reactivates a user account.' 
     })
-    @ApiParam({ name: 'id', required: true, description: 'UUID of the user' })
     @ApiResponse({ status: 200, description: 'User activated successfully' })
-    @ApiResponse({ status: 403, description: 'Forbidden - User does not have the required role' })
-    async activateUser(@Param('id') id: string) {
-        return this.userService.activateUser(id);
+    @ApiResponse({ status: 400, description: 'Bad Request - Validation errors' })
+    async activateUser(@Body() data: ActivateUserDto) {
+        return this.userService.activateUser(data);
     }
 
     @Patch('deactivate/:id')
