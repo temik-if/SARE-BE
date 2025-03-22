@@ -19,6 +19,23 @@ export class BookingService {
         private readonly emailService: EmailService
     ) {}
 
+    async checkBookingLimit(user: string, resourceCondition: any, limit: number, errorMessage: string) {
+        const bookings = await this.prismaService.booking.findMany({
+            where: { 
+                user: {
+                    id: user,
+                    type: "TEACHER"
+                },
+                status: 'SCHEDULED',
+                resource: resourceCondition
+            }
+        });
+    
+        if (bookings.length >= limit) {
+            throw new BadRequestException(errorMessage);
+        }
+    }
+
     async createBooking(user: string, data: CreateBookingDto){
         const activePenalty = await this.penaltyService.findActivePenaltyByUser(user);
 
@@ -26,6 +43,9 @@ export class BookingService {
             throw new BadRequestException('User has an active penalty and cannot create a booking.');
         }
 
+        await this.checkBookingLimit(user, { equipment: { isNot: null } }, 10, 'Teacher has more than 10 bookings with equipment and cannot create a new booking.');
+        await this.checkBookingLimit(user, { room: { isNot: null } }, 6, 'Teacher has more than 6 bookings without room and cannot create a new booking.');
+    
         const resource = await this.resourceService.getAvailableResources(
             data.date,
             data.shift,
