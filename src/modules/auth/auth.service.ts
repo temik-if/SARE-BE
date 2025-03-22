@@ -4,10 +4,10 @@ import { omit } from "lodash";
 import { JwtService } from "@nestjs/jwt";
 import { UserService } from "../user/user.service";
 import { OAuth2Client } from "google-auth-library";
-import { PasswordResetService } from "../password-reset/password-reset.service";
-import { PasswordRequestTokenDto } from "./dtos/password-request-token.dto";
+import { PasswordRequestCodeDto } from "./dtos/password-request-code.dto";
 import { PasswordResetDto } from "./dtos/password-reset.dto";
 import { EmailService } from "../email/email.service";
+import { VerificationService } from "src/modules/verification/verification.service";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -15,7 +15,7 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 export class AuthService {
     constructor(
         private readonly userService: UserService,
-        private readonly passwordResetService: PasswordResetService,
+        private readonly verificationService: VerificationService,
         private readonly emailService: EmailService,
         private readonly jwtService: JwtService
     ) {}
@@ -23,7 +23,7 @@ export class AuthService {
     async validateUser(email: string, password: string) {
         const user = await this.userService.findUserWithPassword(email);
 
-        if (!user || !(await bcrypt.compare(password, user.password)) || !user.is_active) {
+        if (!user || !(await bcrypt.compare(password, user.password))) {
             throw new UnauthorizedException("Invalid credentials");
         }
 
@@ -37,6 +37,13 @@ export class AuthService {
             sub: validatedUser.id,
             type: validatedUser.type
         };
+
+        if (validatedUser.is_active == false) {
+            const code = await this.verificationService.generateCode(validatedUser.id, "ACTIVATION");
+            await this.emailService.sendActivationEmail(validatedUser.email, code);
+
+            throw new UnauthorizedException("User is not activated. Activation code sent to email.");
+        }
 
         return {
             access_token: this.jwtService.sign(payload),
@@ -100,33 +107,27 @@ export class AuthService {
         }
     }
 
-    async requestPasswordReset(data: PasswordRequestTokenDto) {
+    async requestPasswordReset(data: PasswordRequestCodeDto) {
         const user = await this.userService.findUserByEmail(data.email);
 
         if (!user) {
             throw new UnauthorizedException("User not found");
         }
 
-        const token = this.jwtService.sign({ email: user.email, sub: user.id }, { expiresIn: "1h" });
-
-        await this.passwordResetService.saveToken(user.id, token);
-
-        await this.emailService.sendPasswordResetEmail(user.email, token);
+        const code = await this.verificationService.generateCode(user.id, "PASSWORD_RESET");
+        await this.emailService.sendPasswordResetEmail(user.email, code);
 
         return { message: "Password reset instructions have been sent to your email." };
     }
 
     async resetPassword(data: PasswordResetDto) {
-        const payload = this.jwtService.verify(data.token);
-        const resetToken = await this.passwordResetService.findToken(payload.sub, data.token);
+        const user = await this.userService.findUserByEmail(data.email);
 
-        if (!resetToken || resetToken.expiresAt < new Date()) {
-            throw new BadRequestException("Invalid or expired token");
-        }
+        await this.verificationService.findCode(user.id, data.code);
 
-        await this.userService.updatePassword(payload.sub, data.new_password);
+        await this.userService.updatePassword(user.id, data.new_password);
         
-        await this.passwordResetService.deleteToken(payload.sub);
+        await this.verificationService.deleteCode(user.id);
 
         return { message: "Password updated successfully" };
     }

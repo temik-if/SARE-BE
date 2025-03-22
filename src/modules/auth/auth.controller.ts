@@ -1,11 +1,11 @@
-import { Body, Controller, Post, Get, UseGuards, Request } from '@nestjs/common';
+import { Body, Controller, Post, Get, UseGuards, Request, Patch } from '@nestjs/common';
 import { AuthService } from "./auth.service";
 import { LoginDto } from './dtos/login.dto';
 import { ApiBody, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GoogleDto } from './dtos/google.dto';
 import { PasswordResetDto } from './dtos/password-reset.dto';
-import { PasswordRequestTokenDto } from './dtos/password-request-token.dto';
+import { PasswordRequestCodeDto } from './dtos/password-request-code.dto';
 import { DevOnly } from './decorators/dev-only.decorator';
 
 @Controller("user/auth")
@@ -62,15 +62,15 @@ export class AuthController {
         summary: "Request Password Reset",
         description: "Sends an email with a password reset link to the user",
     })
-    @ApiBody({ type: PasswordRequestTokenDto })
+    @ApiBody({ type: PasswordRequestCodeDto })
     @ApiResponse({ status: 200, description: "Password reset link sent" })
     @ApiResponse({ status: 400, description: "Bad Request" })
     @ApiResponse({ status: 404, description: "User not found" })
-    async requestPasswordReset(@Body() data: PasswordRequestTokenDto) {
+    async requestPasswordReset(@Body() data: PasswordRequestCodeDto) {
         return this.authService.requestPasswordReset(data);
     }
 
-    @Post("reset-password")
+    @Patch("reset-password")
     @ApiOperation({
         summary: "Reset Password",
         description: "Resets the user's password using the provided token",

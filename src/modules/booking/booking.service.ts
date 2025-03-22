@@ -7,6 +7,7 @@ import { UpdateBookingDto } from "./dtos/update-booking.dto";
 import { UpdateBookingStatusDto } from "./dtos/update-booking-status.dto";
 import { UserService } from "../user/user.service";
 import { PenaltyService } from "../penalty/penalty.service";
+import { EmailService } from "../email/email.service";
 
 @Injectable()
 export class BookingService {
@@ -14,8 +15,26 @@ export class BookingService {
         private readonly prismaService: PrismaService,
         private readonly resourceService: ResourceService,
         private readonly userService: UserService,
-        private readonly penaltyService: PenaltyService
+        private readonly penaltyService: PenaltyService,
+        private readonly emailService: EmailService
     ) {}
+
+    async checkBookingLimit(user: string, resourceCondition: any, limit: number, errorMessage: string) {
+        const bookings = await this.prismaService.booking.findMany({
+            where: { 
+                user: {
+                    id: user,
+                    type: "TEACHER"
+                },
+                status: 'SCHEDULED',
+                resource: resourceCondition
+            }
+        });
+    
+        if (bookings.length >= limit) {
+            throw new BadRequestException(errorMessage);
+        }
+    }
 
     async createBooking(user: string, data: CreateBookingDto){
         const activePenalty = await this.penaltyService.findActivePenaltyByUser(user);
@@ -24,6 +43,9 @@ export class BookingService {
             throw new BadRequestException('User has an active penalty and cannot create a booking.');
         }
 
+        await this.checkBookingLimit(user, { equipment: { isNot: null } }, 10, 'Teacher has more than 10 bookings with equipment and cannot create a new booking.');
+        await this.checkBookingLimit(user, { room: { isNot: null } }, 6, 'Teacher has more than 6 bookings without room and cannot create a new booking.');
+    
         const resource = await this.resourceService.getAvailableResources(
             data.date,
             data.shift,
@@ -34,10 +56,15 @@ export class BookingService {
             throw new BadRequestException('Resource not available.');
         }
 
+        const userEmail = await this.userService.findUserById(user);
+        const selectedResource = await this.resourceService.findResourceById(data.resource_id);
+
+        await this.emailService.sendBookingConfirmationEmail(userEmail.email, data, selectedResource.name);
+
         return this.prismaService.booking.create({
             data: {
                 user_id: user, 
-                status: "IN_PROGRESS",
+                status: "SCHEDULED",
                 ...data
         }});
     }
@@ -111,6 +138,22 @@ export class BookingService {
 
         if (!validStatus.includes(data.status)){
             throw new BadRequestException('Invalid status.');
+        }
+
+        if (data.status === 'CANCELED'){
+            const userDetails = await this.userService.findUserById(booking.user_id);
+            const resource = await this.resourceService.findResourceById(booking.resource_id);
+
+            await this.emailService.sendBookingCancellationEmail(userDetails.email, booking, resource.name);
+
+            const coordinators = await this.userService.findUserByType('COORDINATOR'); 
+
+            await this.emailService.sendBookingCancellationNotificationToCoordinator(
+                coordinators.map(c => c.email).filter(email => email),
+                booking,
+                userDetails,
+                resource.name
+            );
         }
 
         return this.prismaService.booking.update({

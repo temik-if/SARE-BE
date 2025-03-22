@@ -31,6 +31,11 @@ enum ResourceStatusType {
   UNAVAILABLE
 }
 
+enum VerificationCodeType {
+  ACTIVATION
+  PASSWORD_RESET
+}
+
 model User {
   id         String   @id @default(uuid())
   email      String   @unique
@@ -38,14 +43,14 @@ model User {
   last_name  String
   full_name  String
   password   String
-  is_active  Boolean  @default(true)
+  is_active  Boolean  @default(false)
   type       UserType
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
   bookings  Booking[]
   penalties Penalty[]
-  passwordResetToken PasswordResetToken?
+  codes     VerificationCode?
 }
 
 model Booking {
@@ -102,13 +107,14 @@ model Penalty {
   user User @relation(fields: [user_id], references: [id])
 }
 
-model PasswordResetToken {
+model VerificationCode {
   id        Int      @id @default(autoincrement())
-  user_id   String @unique
-  token     String @unique
-  expiresAt   DateTime
+  user_id   String   @unique
+  code      String   @unique
+  type      VerificationCodeType
+  attempts  Int      @default(0)
+  expiresAt DateTime
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
   user User @relation(fields: [user_id], references: [id])
 }
